@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -442,6 +443,21 @@ func doEval(ir *interp.Interp, code string) (val []interface{}, err error) {
 			}
 		}
 	}()
+
+	if code[0] == '%' {
+		magicCodes := strings.Split(code, "\n")
+		if code[1] != '%' {
+			if len(magicCodes) > 1 {
+				magicCodes = magicCodes[0:2]
+			}
+		}
+
+		eval_magic(magicCodes)
+
+		if code[1] == '%' || len(magicCodes) <= 2 {
+			return nil, nil
+		}
+	}
 
 	// Prepare and perform the multiline evaluation.
 	compiler := ir.Comp
