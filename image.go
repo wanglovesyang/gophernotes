@@ -69,6 +69,10 @@ func (receipt *msgReceipt) PublishImage(img image.Image) error {
 	return receipt.PublishDisplayData(data)
 }
 
+type Renderable interface {
+	RenderJupyter() string
+}
+
 // if vals[] contain a single non-nil value which is an image.Image,
 // convert it to Data and return it.
 // if instead the single non-nil value is a Data, return it.
@@ -78,7 +82,7 @@ func renderResults(vals []interface{}) Data {
 	var obj interface{}
 	for _, val := range vals {
 		switch val.(type) {
-		case image.Image, Data:
+		case image.Image, Data, Renderable:
 			obj = val
 		case nil:
 			nilcount++
@@ -93,6 +97,8 @@ func renderResults(vals []interface{}) Data {
 			}
 		case Data:
 			return val
+		case Renderable:
+			return HTML(val.RenderJupyter())
 		}
 	}
 	if nilcount == len(vals) {
